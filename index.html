@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efectul Fotoelectric Extern și Detectorul de Fum</title>
+    <!-- Incarcarea Tailwind CSS pentru stilizare rapida si moderna --><script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Definirea culorilor personalizate pentru temă */
+        :root {
+            --primary: #4f46e5; /* Indigo */
+            --secondary: #10b981; /* Emerald */
+            --background: #f3f4f6; /* Gray 100 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background);
+        }
+        .card {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease-in-out;
+        }
+        /* Stil pentru vizualizarea fasciculului de lumină */
+        #light-beam {
+            position: absolute; /* Asigura pozitionarea in interiorul containerului parinte */
+            left: 0;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(to right, #fcd34d, #f97316); /* Galben-portocaliu */
+            box-shadow: 0 0 10px #f97316;
+            transition: opacity 0.5s ease-in-out;
+            border-radius: 5px; /* Margini usor rotunjite */
+        }
+        /* Stil pentru elementul care simuleaza fumul */
+        .smoke-particle {
+            position: absolute;
+            top: 50%;
+            left: 0%; /* Start outside */
+            width: 60px; /* Mai mare */
+            height: 60px; /* Mai mare */
+            background-color: #a0aec0; /* Gri mai deschis, mai vizibil */
+            border-radius: 50%;
+            opacity: 0;
+            transform: translate(-100%, -50%);
+            transition: transform 1.5s ease-out, opacity 0.7s ease-in-out; /* Tranzitie mai lina */
+            filter: blur(5px); /* Efect de fum difuz */
+        }
+        .smoke-visible {
+            opacity: 0.8; /* Opacitate mai mare */
+            transform: translate(calc(50% + 50px), -50%); /* Poziția în mijlocul camerei */
+            animation: smoke-float 3s infinite alternate ease-in-out; /* Animatie de plutire */
+        }
+
+        /* Animatie pentru fum */
+        @keyframes smoke-float {
+            0% { transform: translate(calc(50% + 50px), -50%); }
+            50% { transform: translate(calc(50% + 50px + 10px), calc(-50% - 10px)); }
+            100% { transform: translate(calc(50% + 50px), -50%); }
+        }
+
+        .sensor {
+            width: 60px; /* Mai lat */
+            height: 60px; /* Mai inalt */
+            font-size: 0.75rem; /* Text mai mic, sa incapa */
+            padding: 0.25rem; /* Mai mult padding */
+            line-height: 1; /* Pentru a centra vertical */
+            display: flex; /* Pentru a centra textul */
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transition: all 0.5s ease-in-out; /* Tranzitie pentru ring/culoare */
+        }
+
+        .sensor-active {
+            background-color: var(--secondary) !important;
+            box-shadow: 0 0 15px var(--secondary);
+            outline: 3px solid var(--secondary); /* Contur vizibil */
+            outline-offset: 3px;
+        }
+        .sensor-inactive {
+            background-color: #ef4444 !important; /* Roșu */
+            box-shadow: 0 0 15px #ef4444;
+            outline: 3px solid #ef4444; /* Contur vizibil */
+            outline-offset: 3px;
+        }
+        .led {
+            outline: 3px solid #dc2626; /* Contur rosu */
+            outline-offset: 3px;
+        }
+        .detector-chamber {
+            position: relative;
+            width: 80%; /* Lățime mai mare */
+            height: 100px; /* Înălțime mai mare */
+            background-color: #e2e8f0; /* Gri deschis pentru fundal camera */
+            border: 2px solid #cbd5e0; /* O bordura mai clara */
+            border-radius: 0.75rem;
+            margin: 1.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem; /* Padding la capete */
+            overflow: hidden; /* Pentru a ascunde particula de fum inainte sa intre */
+        }
+        .component-label {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.75rem;
+            color: #4b5563;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <header class="text-center mb-8">
+        <h1 class="text-4xl font-extrabold text-gray-900 mb-2">Efectul Fotoelectric Extern și Aplicația sa</h1>
+        <p class="text-xl text-indigo-600">O prezentare interactivă</p>
+    </header>
+
+    <main class="max-w-4xl mx-auto space-y-8">
+
+        <!-- Sectiunea 1: Ce este Efectul Fotoelectric Extern --><section class="card p-6">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">1. Definiție și Principiu</h2>
+            <p class="text-gray-700 mb-4">
+                <span class="font-semibold">Efectul Fotoelectric Extern</span> reprezintă emisia de electroni (numiți fotoelectroni) de pe suprafața unui metal (sau alt material) sub influența radiației electromagnetice (lumină vizibilă, UV, raze X).
+            </p>
+            <ul class="list-disc pl-5 text-gray-700 space-y-2">
+                <li><span class="font-medium">Cuante de Lumină:</span> Acest efect a fost explicat de Albert Einstein în 1905, considerând că lumina este formată din pachete discrete de energie numite <span class="font-medium text-secondary">fotoni</span>.</li>
+                <li><span class="font-medium">Frecvența Prag:</span> Emisia de electroni are loc doar dacă frecvența luminii incidente (<span class="font-mono">&nu;</span>) este mai mare decât o anumită frecvență minimă, numită <span class="font-medium text-secondary">frecvența de prag</span> (<span class="font-mono">&nu;₀</span>), specifică materialului.</li>
+                <li><span class="font-medium">Intensitate vs. Viteză:</span> Intensitatea luminii afectează numărul de electroni emiși (intensitatea curentului), dar nu și energia lor cinetică maximă.</li>
+            </ul>
+        </section>
+
+        <!-- Sectiunea 2: Ecuația lui Einstein --><section class="card p-6">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">2. Ecuația Fundamentala (Einstein)</h2>
+            <p class="text-gray-700 mb-4">
+                Energia unui foton incident (<span class="font-mono">E = h&nu;</span>) se utilizează pentru a scoate electronul din metal (lucrul mecanic de extracție, <span class="font-mono">L</span>) și restul se transformă în energie cinetică maximă (<span class="font-mono">E_c max</span>) a fotoelectronului.
+            </p>
+            <!-- Formula corectata pentru afisare HTML folosind simboluri Unicode/HTML entities --><div class="bg-gray-100 p-4 rounded-lg text-center font-serif text-2xl text-gray-900 border-l-4 border-indigo-500">
+                E<sub>cin max</sub> = h&nu; - L
+            </div>
+            <p class="text-sm text-gray-600 mt-2">
+                Unde: <span class="font-mono">h</span> este Constanta lui Planck; <span class="font-mono">&nu;</span> este Frecvența radiației incidente; <span class="font-mono">L</span> este Lucrul Mecanic de Extracție (energia minimă necesară pentru a scoate electronul).
+            </p>
+        </section>
+
+        <!-- Sectiunea 3: Aplicatia - Detectorul de Fum Optic --><section class="card p-6">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">3. Aplicație: Detectorul de Fum Optic</h2>
+            <p class="text-gray-700 mb-4">
+                Deși detectoarele moderne folosesc fotodiode (care utilizează Efectul Fotoelectric Intern), principiul de bază este același: detectarea luminii. 
+            </p>
+            <ul class="list-disc pl-5 text-gray-700 space-y-2">
+                <li><span class="font-medium">Componente:</span> Un LED (sursa de lumină) și un <span class="font-medium text-secondary">senzor fotosensibil</span> (fotocelulă, fotodiodă).</li>
+                <li><span class="font-medium">Starea Normală:</span> În lipsa fumului, lumina de la LED fie nu ajunge la senzor (cameră în unghi), fie ajunge direct la el. Senzorul generează un <span class="font-medium text-primary">curent electric constant</span> (datorită efectului fotoelectric).</li>
+                <li><span class="font-medium">Starea de Alarmă:</span> Când pătrund particule de fum în cameră, acestea <span class="font-medium text-primary">întrerup sau împrăștie fasciculul de lumină</span>. Senzorul detectează o <span class="font-medium text-primary">schimbare bruscă</span> a intensității luminii, ceea ce modifică brusc curentul generat. Această modificare declanșează alarma.</li>
+            </ul>
+        </section>
+
+        <!-- Sectiunea 4: Vizualizarea Interactivă a Principiului de Detecție --><section class="card p-6">
+            <h2 class="text-2xl font-bold text-indigo-700 mb-4">4. Vizualizare: Principiul Detectorului de Fum</h2>
+            <p class="text-gray-700 mb-4">
+                Simulați pătrunderea fumului. Observați cum se schimbă starea senzorului (fotocelulei) și a indicatorului de curent.
+            </p>
+
+            <div class="flex flex-col items-center justify-center p-6 bg-gray-200 rounded-lg relative border-2 border-gray-300">
+                
+                <div class="flex items-center justify-between w-full relative z-10 mb-4">
+                    <!-- LED/Sursa de Lumină --><div class="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg relative sensor led">
+                        LED
+                        <span class="component-label absolute -bottom-6 left-1/2 -translate-x-1/2">Sursă Lumină</span>
+                    </div>
+
+                    <!-- Camera de detecție și Fasciculul de Lumină --><div class="detector-chamber flex-grow mx-4 relative">
+                        <p class="absolute -top-6 left-1/2 -translate-x-1/2 text-sm text-gray-600">Camera de Detecție</p>
+                        
+                        <!-- Fasciculul de lumină (activ implicit) --><div id="light-beam"></div>
+
+                        <!-- Particula de Fum (initial ascunsa) --><div id="smoke-particle" class="smoke-particle"></div>
+                        <span class="component-label absolute bottom-2 left-1/2 -translate-x-1/2">Fum</span>
+                    </div>
+
+                    <!-- Senzorul Fotosensibil (Fotocelulă) --><div id="photo-sensor" class="sensor bg-secondary rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors duration-500 sensor-active shadow-lg relative">
+                        SENSOR
+                        <span class="component-label absolute -bottom-6 left-1/2 -translate-x-1/2">Fotocelulă</span>
+                    </div>
+                </div>
+
+                <!-- Indicatorul de Curent --><div class="mt-8 w-full text-center">
+                    <p class="text-sm font-semibold text-gray-800">Curent Fotoelectric:</p>
+                    <div id="current-indicator" class="w-full h-10 flex items-center justify-center text-lg font-bold rounded-lg border-2 border-gray-300 bg-green-100 text-secondary transition-colors duration-500 shadow-inner">
+                        Flux Normal (Curent MAX)
+                    </div>
+                </div>
+
+                <!-- Buton de Simulare --><button onclick="simulateSmoke()" id="smoke-button" class="mt-6 px-8 py-3 bg-primary font-extrabold rounded-full hover:bg-indigo-700 transition-all duration-300 shadow-xl hover:scale-[1.03] text-lg">
+                    Simulează Fumul
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-12 pt-6 border-t border-gray-300 text-center text-gray-500 text-sm">
+        <p>Prezentare realizată pentru înțelegerea principiului Efectului Fotoelectric Extern.</p>
+    </footer>
+
+    <script>
+        // Setare referinte DOM
+        const lightBeam = document.getElementById('light-beam');
+        const photoSensor = document.getElementById('photo-sensor');
+        const currentIndicator = document.getElementById('current-indicator');
+        const smokeParticle = document.getElementById('smoke-particle');
+        const smokeButton = document.getElementById('smoke-button');
+        let isSmokePresent = false;
+
+        /**
+         * Functia simuleaza patrunderea fumului in camera de detectie.
+         */
+        function simulateSmoke() {
+            if (isSmokePresent) {
+                // Scoate fumul (Starea Normala)
+                smokeParticle.classList.remove('smoke-visible');
+                
+                // Repunerea fasciculului de lumina (Opacitatea revine la normal)
+                lightBeam.style.opacity = 1;
+                
+                // Schimbarea starii senzorului si indicatorului
+                photoSensor.classList.add('sensor-active');
+                photoSensor.classList.remove('sensor-inactive');
+                currentIndicator.textContent = 'Flux Normal (Curent MAX)';
+                currentIndicator.classList.remove('bg-red-100', 'text-red-600');
+                currentIndicator.classList.add('bg-green-100', 'text-secondary');
+                
+                smokeButton.textContent = 'Simulează Fumul';
+                isSmokePresent = false;
+            } else {
+                // Adauga fumul (Starea de Alarma)
+                smokeParticle.classList.add('smoke-visible');
+
+                // Intreruperea fasciculului de lumina (Simulare vizuala a blocajului)
+                // O intarziere mica pentru a permite animatia particulei sa inceapa
+                setTimeout(() => {
+                    lightBeam.style.opacity = 0.1; // Fasciculul este blocat/imprastiat
+                }, 500); 
+
+                // Schimbarea starii senzorului si indicatorului (Alarma)
+                photoSensor.classList.remove('sensor-active');
+                photoSensor.classList.add('sensor-inactive');
+                currentIndicator.textContent = 'ALARMĂ! Flux întrerupt (Curent MIN)';
+                currentIndicator.classList.remove('bg-green-100', 'text-secondary');
+                currentIndicator.classList.add('bg-red-100', 'text-red-600');
+                
+                smokeButton.textContent = 'Înlătură Fumul';
+                isSmokePresent = true;
+            }
+        }
+        
+        // Initializarea: Asigura ca starea initiala este cea de "Fara Fum"
+        window.onload = () => {
+             // Incepe cu starea "Fara Fum" setata implicit in HTML/CSS/JS
+        };
+
+    </script>
+</body>
+</html>
